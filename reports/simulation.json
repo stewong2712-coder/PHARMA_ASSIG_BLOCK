@@ -1,0 +1,146 @@
+{
+  "generatedAt": "2026-10-22T18:10:50.826Z",
+  "actors": {
+    "regulator": {
+      "name": "National Medicines Regulator (fictional)",
+      "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+    },
+    "manufacturer": {
+      "name": "Lumora Biologics Ltd (fictional)",
+      "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+    },
+    "wholesaler1": {
+      "name": "ColdRoute Distribution (fictional)",
+      "address": "0x90F79bf6EB2c4f870365E785982E1f101E93b906"
+    },
+    "wholesaler2": {
+      "name": "Meridian Wholesale (fictional)",
+      "address": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65"
+    },
+    "pharmacy": {
+      "name": "Westside Community Pharmacy (fictional)",
+      "address": "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc"
+    },
+    "prescriber": {
+      "name": "Dr A. Rahman (fictional)",
+      "address": "0x976EA74026E726554dB657fA54763abd0C3a0aa9"
+    }
+  },
+  "phases": [
+    {
+      "phase": "after manufacture",
+      "issued": 10000,
+      "held": 10000,
+      "inTransit": 0,
+      "dispensed": 0,
+      "lost": 0,
+      "destroyed": 0,
+      "balanced": true
+    },
+    {
+      "phase": "after split",
+      "issued": 10000,
+      "held": 10000,
+      "inTransit": 0,
+      "dispensed": 0,
+      "lost": 0,
+      "destroyed": 0,
+      "balanced": true
+    },
+    {
+      "phase": "after quota check",
+      "issued": 10000,
+      "held": 10000,
+      "inTransit": 0,
+      "dispensed": 0,
+      "lost": 0,
+      "destroyed": 0,
+      "balanced": true
+    },
+    {
+      "phase": "after dispensing",
+      "issued": 10000,
+      "held": 9940,
+      "inTransit": 0,
+      "dispensed": 60,
+      "lost": 0,
+      "destroyed": 0,
+      "balanced": true
+    },
+    {
+      "phase": "after loss and destruction",
+      "issued": 10000,
+      "held": 9920,
+      "inTransit": 0,
+      "dispensed": 60,
+      "lost": 12,
+      "destroyed": 8,
+      "balanced": true
+    },
+    {
+      "phase": "after recall",
+      "issued": 10000,
+      "held": 9920,
+      "inTransit": 0,
+      "dispensed": 60,
+      "lost": 12,
+      "destroyed": 8,
+      "balanced": true
+    }
+  ],
+  "gas": {
+    "setQuota": {
+      "calls": 1,
+      "average": 52096,
+      "max": 52096
+    },
+    "createLot": {
+      "calls": 1,
+      "average": 259964,
+      "max": 259964
+    },
+    "offerTransfer": {
+      "calls": 4,
+      "average": 195373,
+      "max": 205925
+    },
+    "acceptTransfer": {
+      "calls": 3,
+      "average": 83986,
+      "max": 102183
+    },
+    "cancelTransfer": {
+      "calls": 1,
+      "average": 46400,
+      "max": 46400
+    },
+    "issuePrescription": {
+      "calls": 1,
+      "average": 236604,
+      "max": 236604
+    },
+    "dispense": {
+      "calls": 2,
+      "average": 67234,
+      "max": 68813
+    },
+    "reportLoss": {
+      "calls": 1,
+      "average": 61456,
+      "max": 61456
+    },
+    "destroyStock": {
+      "calls": 1,
+      "average": 38825,
+      "max": 38825
+    },
+    "recallLot": {
+      "calls": 1,
+      "average": 33000,
+      "max": 33000
+    }
+  },
+  "quotaBlocked": "QuotaExceeded",
+  "earlyRefillBlocked": "TooSoon",
+  "recallBlocked": "LotNotActive"
+}

@@ -1,0 +1,24 @@
+{
+  "network": "sepolia",
+  "chainId": 11155111,
+  "contract": "0x29a3EeA47dfFF0A6703Ae0A2c5F63766270cc954",
+  "deployBlock": 11971602,
+  "deployTx": "0x4d3be3f33bf7ff3f9b79176d4afd84c1c21e28741aeffe9e57c7baea99ea6d54",
+  "deployedAt": "2026-10-22T19:27:49.736Z",
+  "admin": "0x970BD8d3869967Dc09d8a842017d830680B68f65",
+  "explorer": "https://sepolia.etherscan.io",
+  "rpcUrls": [
+    "https://ethereum-sepolia-rpc.publicnode.com",
+    "https://sepolia.drpc.org",
+    "https://1rpc.io/sepolia"
+  ],
+  "product": "MORPH-10MG-TAB",
+  "sampleLot": "MOR-2026-001",
+  "demoWallets": {
+    "regulator": "0x52F17e7603a162B62E2549e1C355bA56Aee99134",
+    "manufacturer": "0xc6c0347Da3A9DCaB977DFc8DA3495200bc00F7F2",
+    "wholesaler": "0x56e53b57717A88FC219BE29E125912672D90ec36",
+    "pharmacy": "0xC24d0f37228c581d95d10da698D701a11913faD5",
+    "prescriber": "0x2F6c777CA01614D8c7dC5d7cA417d3Fbc1319bEe"
+  }
+}

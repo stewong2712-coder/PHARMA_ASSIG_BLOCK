@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RxGuard Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #f5f4f1; --surface: #ffffff; --sunk: #ebe9e4; --line: #d9d5cc; --ink: #1d2328; --ink-2: #555d63;
+  --accent: #5b3f8c; --accent-ink: #ffffff; --accent-soft: #e8e1f3;
+  --good: #1e7d4f; --good-soft: #dff1e7; --warn: #8a5a00; --warn-soft: #f8ebd4; --bad: #b3261e; --bad-soft: #f8e1df;
+  --f-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --f-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15131a; --surface: #1e1b26; --sunk: #181620; --line: #332e40; --ink: #ebe8f0; --ink-2: #a8a2b5;
+  --accent: #b79cf0; --accent-ink: #1c1230; --accent-soft: #2f2645;
+  --good: #5cc08e; --good-soft: #143528; --warn: #e3a64a; --warn-soft: #3a2b12; --bad: #f07a70; --bad-soft: #3d1a17; color-scheme: dark; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+a { color: var(--accent); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header.top { position: sticky; top: 0; z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; padding-block: 10px; }
+.brand { font: 700 24px var(--f-display); letter-spacing: .02em; display: flex; align-items: baseline; gap: 8px; }
+.brand small { font: 400 11px var(--f-mono); color: var(--ink-2); }
+.livepill { font: 600 12px var(--f-display); letter-spacing: .08em; text-transform: uppercase; background: var(--good-soft); color: var(--good); padding: 2px 8px; border-radius: 999px; }
+.chain { font: 12px var(--f-mono); color: var(--ink-2); display: flex; gap: 10px; flex-wrap: wrap; }
+nav.views { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+nav.views button, .role button { font: 600 14px var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 6px 12px; border-radius: var(--r); cursor: pointer; }
+nav.views button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.role button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sub { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding-block: 14px 6px; }
+.label { font: 600 12px var(--f-display); text-transform: uppercase; letter-spacing: .09em; color: var(--ink-2); }
+.role { display: flex; flex-wrap: wrap; gap: 4px; }
+.who { font-size: 13px; color: var(--ink-2); overflow-wrap: anywhere; }
+main { padding-block: 8px 48px; }
+.grid { display: grid; grid-template-columns: minmax(0, 390px) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } nav.views { margin-left: 0; } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; min-width: 0; }
+.stack { display: grid; gap: 16px; }
+h2 { font: 700 20px/1.2 var(--f-display); letter-spacing: .02em; margin: 0 0 10px; }
+h3 { font: 600 15px/1.3 var(--f-body); margin: 16px 0 8px; }
+p { margin: 0 0 10px; }
+.muted { color: var(--ink-2); font-size: 13px; }
+.mono { font-family: var(--f-mono); font-size: 12px; overflow-wrap: anywhere; }
+.pill { display: inline-flex; font: 600 12px var(--f-display); text-transform: uppercase; letter-spacing: .08em; padding: 2px 8px; border-radius: 999px; background: var(--sunk); color: var(--ink-2); white-space: nowrap; }
+.pill.Active, .pill.Accepted, .pill.Completed { background: var(--good-soft); color: var(--good); }
+.pill.Open { background: var(--accent-soft); color: var(--accent); }
+.pill.Recalled, .pill.Rejected, .pill.Cancelled { background: var(--bad-soft); color: var(--bad); }
+.pill.Expired { background: var(--warn-soft); color: var(--warn); }
+.card { border: 1px solid var(--line); border-radius: var(--r); padding: 12px; margin-bottom: 10px; }
+.card .head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.card .lot { font: 500 13px var(--f-mono); }
+.bars { display: grid; gap: 4px; margin-top: 8px; }
+.bar { display: grid; grid-template-columns: 110px 1fr 56px; gap: 8px; align-items: center; font-size: 12px; color: var(--ink-2); }
+.bar .track { height: 10px; background: var(--sunk); border-radius: 5px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--accent); }
+.bar .num { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th { text-align: left; font: 600 11px var(--f-display); text-transform: uppercase; letter-spacing: .08em; color: var(--ink-2); padding: 6px 8px; border-bottom: 1px solid var(--line); }
+td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tablebox { overflow-x: auto; }
+form { display: grid; gap: 10px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } }
+label { display: grid; gap: 4px; font-size: 13px; color: var(--ink-2); }
+input, select { font: 14px var(--f-body); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 7px 9px; width: 100%; min-width: 0; }
+input.mono { font-family: var(--f-mono); font-size: 12px; }
+.btn { font: 700 14px var(--f-body); border-radius: var(--r); padding: 8px 14px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); cursor: pointer; }
+.btn.small { padding: 4px 10px; font-size: 13px; }
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn.danger { background: var(--bad); border-color: var(--bad); color: #fff; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.note { font-size: 13px; padding: 8px 10px; border-radius: var(--r); background: var(--sunk); overflow-wrap: anywhere; }
+.note.err { background: var(--bad-soft); color: var(--bad); } .note.ok { background: var(--good-soft); color: var(--good); } .note.warn { background: var(--warn-soft); color: var(--warn); }
+.activity { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: min(440px, calc(100vw - 32px)); background: var(--ink); color: var(--surface); padding: 10px 14px; border-radius: var(--r); font-size: 13px; z-index: 20; }
+.activity a { color: var(--surface); }
+.patient { max-width: 560px; margin: 0 auto; display: grid; gap: 16px; }
+.phone { border: 1px solid var(--line); border-radius: 22px; background: var(--surface); padding: 18px; display: grid; gap: 14px; }
+.samples { display: flex; flex-wrap: wrap; gap: 6px; }
+.samples button { font: 13px var(--f-body); border: 1px dashed var(--line); background: var(--sunk); color: var(--ink); border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+.verdict { border-radius: 14px; padding: 18px; display: grid; gap: 8px; }
+.verdict .big { font: 700 32px/1.05 var(--f-display); }
+.verdict.ok { background: var(--good-soft); color: var(--good); } .verdict.warn { background: var(--warn-soft); color: var(--warn); } .verdict.bad { background: var(--bad-soft); color: var(--bad); }
+.verdict .detail { color: var(--ink); font-size: 14px; }
+.spinner { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; display: inline-block; animation: spin .8s linear infinite; vertical-align: -2px; margin-right: 6px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">RxGuard <span class="livepill">Live</span> <small>Ethereum Sepolia test network</small></div>
+    <div class="chain" id="chainInfo">Connecting…</div>
+    <nav class="views" aria-label="Views">
+      <button data-view="portal" aria-pressed="true">Stakeholder portal</button>
+      <button data-view="patient" aria-pressed="false">Patient lot check</button>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <div id="setupError" hidden class="note err" style="margin-top:16px"></div>
+
+  <section id="v-portal">
+    <div class="sub">
+      <span class="label">Acting as</span>
+      <div class="role" id="roles"></div>
+      <span class="who" id="who"></span>
+    </div>
+    <main class="grid">
+      <div class="stack">
+        <div class="panel" id="actionPanel"></div>
+        <div class="panel" id="offersPanel"></div>
+      </div>
+      <div class="stack">
+        <div class="panel" id="lotsPanel"><p class="muted">Loading from the blockchain…</p></div>
+        <div class="panel" id="rxPanel"></div>
+      </div>
+    </main>
+  </section>
+
+  <section id="v-patient" hidden>
+    <main class="patient">
+      <div class="phone">
+        <div>
+          <div class="label">Check your medicine</div>
+          <h2 style="margin:4px 0 0">Enter the product and lot printed on the pack</h2>
+          <p class="muted">This reads the real contract on the Sepolia blockchain. It is free and needs no wallet. It checks the lot, not your personal prescription.</p>
+        </div>
+        <div class="samples" id="samples"></div>
+        <form id="verifyForm">
+          <label for="vProd">Product code<input id="vProd" class="mono" required></label>
+          <label for="vLot">Lot number<input id="vLot" class="mono" required></label>
+          <button class="btn" type="submit">Check this lot</button>
+        </form>
+        <div id="verdict"></div>
+      </div>
+    </main>
+  </section>
+</div>
+<div class="activity" id="activity" hidden role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+<script src="deployment.js"></script>
+<script>
+// -----------------------------------------------------------------------------
+// RxGuard Live: talks to the deployed RxGuard contract.
+// Reads go through a public RPC endpoint. Writes are signed by the demo wallets
+// created by scripts/deploy-live.js (test ETH only), so visitors need no wallet.
+// -----------------------------------------------------------------------------
+const D = window.RXGUARD_DEPLOYMENT;
+const LOTSTATUS = ["None", "Active", "Recalled"];
+const OFFERSTATUS = ["None", "Open", "Accepted", "Rejected", "Cancelled", "Expired"];
+const RXSTATUS = ["None", "Active", "Completed", "Cancelled"];
+const RXVERDICT = ["Unknown", "Valid", "Expired", "Completed", "Cancelled", "Too soon"];
+const LOTVERDICT = ["Unknown", "Genuine", "Recalled", "Expired"];
+const ROLES = [["manufacturer", "Manufacturer"], ["wholesaler", "Wholesaler"], ["pharmacy", "Pharmacy"], ["prescriber", "Prescriber"], ["regulator", "Regulator"]];
+const FRIENDLY = {
+  InvalidInput: "Check the values you entered.",
+  LotExists: "A lot with this product and number already exists.",
+  UnknownLot: "That lot does not exist.",
+  LotNotActive: "This lot has been recalled.",
+  LotExpired: "This lot has passed its expiry date.",
+  InsufficientStock: "This organisation does not hold that many units.",
+  InvalidRecipient: "Stock can only move manufacturer to wholesaler, or wholesaler to wholesaler or pharmacy.",
+  Suspended: "This organisation is suspended by the regulator.",
+  NotOfferRecipient: "Only the organisation the offer is addressed to can do this.",
+  NotOfferSender: "Only the organisation that made the offer can cancel it.",
+  OfferNotOpen: "This offer is no longer open.",
+  OfferHasExpired: "This offer has timed out.",
+  OfferNotExpired: "This offer has not timed out yet.",
+  NoQuota: "The regulator has not licensed this pharmacy for this product.",
+  QuotaExceeded: "This would take the pharmacy over its 30-day quota.",
+  RxNotActive: "This prescription is completed or cancelled.",
+  RxHasExpired: "This prescription has expired.",
+  WrongPharmacy: "This prescription is reserved for another pharmacy.",
+  NoFillsLeft: "All fills on this prescription are used.",
+  TooManyUnits: "That is more than the prescription still allows.",
+  WrongProduct: "The lot is not the product that was prescribed.",
+  TooSoon: "The minimum gap between fills has not passed.",
+  BadCode: "The prescription code does not match the next fill.",
+  NotAuthorised: "This organisation is not allowed to do that.",
+  UnknownRx: "No prescription with that number.",
+  AccessControlUnauthorizedAccount: "This organisation does not have the role needed for this action.",
+};
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const short = (h) => (h && h.length > 14 ? h.slice(0, 8) + "…" + h.slice(-4) : h);
+const fmtD = (s) => new Date(Number(s) * 1000).toISOString().slice(0, 10);
+const fmtT = (s) => new Date(Number(s) * 1000).toISOString().replace("T", " ").slice(0, 16) + " UTC";
+const txLink = (h) => (D.explorer ? `<a href="${D.explorer}/tx/${h}" target="_blank" rel="noopener">${short(h)}</a>` : `<span class="mono">${short(h)}</span>`);
+const addrLink = (a) => (D.explorer ? `<a class="mono" href="${D.explorer}/address/${a}" target="_blank" rel="noopener">${short(a)}</a>` : `<span class="mono">${short(a)}</span>`);
+
+const state = { view: "portal", role: "manufacturer", lots: [], offers: [], rxs: [], busy: false, rxInfo: "", newCodes: null };
+let provider, reader, wallets = {}, orgByAddr = {};
+
+async function connect() {
+  for (const url of D.rpcUrls) {
+    try {
+      const p = new ethers.JsonRpcProvider(url, D.chainId, { staticNetwork: true, cacheTimeout: -1 });
+      await p.getBlockNumber();
+      provider = p; break;
+    } catch { /* try the next endpoint */ }
+  }
+  if (!provider) throw new Error("Could not reach the blockchain. Check your internet connection and refresh.");
+  reader = new ethers.Contract(D.contract, D.abi, provider);
+  for (const [role, w] of Object.entries(D.demoWallets)) {
+    wallets[role] = new ethers.Wallet(w.privateKey, provider);
+    orgByAddr[w.address.toLowerCase()] = w.org;
+  }
+  orgByAddr[D.admin.toLowerCase()] = "Consortium administrator";
+}
+const orgOf = (a) => orgByAddr[(a || "").toLowerCase()] || short(a);
+const roleAddr = (r) => D.demoWallets[r].address;
+
+async function load() {
+  const nLots = Number(await reader.lotCount());
+  const ids = await Promise.all(Array.from({ length: nLots }, (_, i) => reader.lotIdAt(i)));
+  state.lots = await Promise.all(ids.map(async (id) => {
+    const lot = (await reader.getLot(id)).toObject();
+    const stock = {};
+    await Promise.all(Object.keys(D.demoWallets).map(async (r) => { stock[r] = Number(await reader.stock(id, roleAddr(r))); }));
+    return { id, ...lot, stock };
+  }));
+  const nOffers = Number(await reader.offerCount());
+  state.offers = await Promise.all(Array.from({ length: nOffers }, async (_, i) => ({ id: i + 1, ...(await reader.getOffer(i + 1)).toObject() })));
+  const nRx = Number(await reader.rxCount());
+  state.rxs = await Promise.all(Array.from({ length: nRx }, async (_, i) => {
+    const rx = (await reader.getRx(i + 1)).toObject();
+    const v = await reader.verifyRx(i + 1);
+    return { id: i + 1, ...rx, verdict: Number(v.verdict), unitsLeft: Number(v.unitsLeft), fillsLeft: Number(v.fillsLeft), nextFillAt: Number(v.nextFillAt) };
+  }));
+  const block = await provider.getBlockNumber();
+  $("#chainInfo").innerHTML = `<span>block ${block}</span><span>contract ${addrLink(D.contract)}</span><span>${Object.keys(D.demoWallets).length} demo organisations</span>`;
+}
+
+// ---- Sending transactions -----------------------------------------------------
+function activity(html, keep) {
+  const el = $("#activity");
+  el.innerHTML = html; el.hidden = false;
+  clearTimeout(activity.t);
+  if (!keep) activity.t = setTimeout(() => { el.hidden = true; }, 9000);
+}
+function friendly(e) {
+  try {
+    const data = e.data || e.error?.data || e.info?.error?.data;
+    const parsed = data && reader.interface.parseError(data);
+    if (parsed) return FRIENDLY[parsed.name] || parsed.name;
+  } catch { /* fall through */ }
+  if (e.revert?.name) return FRIENDLY[e.revert.name] || e.revert.name;
+  if (/insufficient funds/i.test(e.message || "")) return "This demo wallet has run out of test ETH. Run scripts/topup-live.js.";
+  return e.shortMessage || e.message || String(e);
+}
+async function send(label, build) {
+  if (state.busy) { activity("Please wait for the previous step to finish."); return; }
+  state.busy = true;
+  const c = reader.connect(wallets[state.role]);
+  try {
+    activity(`<span class="spinner"></span>${esc(label)}: checking…`, true);
+    const tx = await build(c);
+    activity(`<span class="spinner"></span>${esc(label)}: waiting for the next block (about 12 seconds)… ${txLink(tx.hash)}`, true);
+    await tx.wait();
+    activity(`${esc(label)}: confirmed. ${txLink(tx.hash)}`);
+    await load(); render();
+  } catch (e) {
+    activity(`Could not ${esc(label.toLowerCase())}: ${esc(friendly(e))}`);
+  } finally { state.busy = false; }
+}
+
+// ---- Rendering ------------------------------------------------------------------
+function lotOptions(sel) {
+  return state.lots.map((l) => `<option value="${l.id}" ${l.id === sel ? "selected" : ""}>${esc(l.lotNo)} · ${esc(l.product)}</option>`).join("");
+}
+function recipientOptions(roles) {
+  return roles.map((r) => `<option value="${roleAddr(r)}">${esc(D.demoWallets[r].org)}</option>`).join("");
+}
+
+function renderRoles() {
+  $("#roles").innerHTML = ROLES.map(([k, l]) => `<button data-role="${k}" aria-pressed="${state.role === k}">${l}</button>`).join("");
+  const w = D.demoWallets[state.role];
+  $("#who").innerHTML = `${esc(w.org)} · ${addrLink(w.address)}`;
+}
+
+function renderLots() {
+  const rows = state.lots.map((l) => {
+    const held = Object.values(l.stock).reduce((a, b) => a + b, 0);
+    const pct = (n) => Math.round((100 * n) / Number(l.issued));
+    const bar = (name, n) => `<div class="bar"><span>${name}</span><div class="track"><div class="fill" style="width:${pct(n)}%"></div></div><span class="num">${n}</span></div>`;
+    return `<div class="card">
+      <div class="head"><div><div class="lot">${esc(l.lotNo)}</div><div class="muted">${esc(l.product)} · expires ${fmtD(l.expiry)}</div></div>
+        <span class="pill ${LOTSTATUS[Number(l.status)]}">${LOTSTATUS[Number(l.status)]}</span></div>
+      <div class="bars">
+        ${Object.keys(D.demoWallets).map((r) => bar(ROLES.find((x) => x[0] === r)[1], l.stock[r])).join("")}
+        ${bar("In transit", Number(l.inTransit))}${bar("Dispensed", Number(l.dispensed))}${bar("Lost", Number(l.lost))}${bar("Destroyed", Number(l.destroyed))}
+      </div>
+      <p class="muted" style="margin:8px 0 0">Made: ${Number(l.issued)}. Everything is accounted for when held + in transit + dispensed + lost + destroyed = ${Number(l.issued)}. Accounted: ${held + Number(l.inTransit) + Number(l.dispensed) + Number(l.lost) + Number(l.destroyed)}.</p>
+    </div>`;
+  }).join("");
+  $("#lotsPanel").innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2 style="margin:0">Lots on the blockchain</h2><button class="btn ghost small" id="refresh" type="button">Refresh</button></div>
+    <div style="margin-top:10px">${rows || '<p class="muted">No lots yet. Register one as the manufacturer.</p>'}</div>`;
+}
+
+function renderRx() {
+  const rows = state.rxs.slice().reverse().map((r) => `<tr>
+    <td>#${r.id}</td><td class="mono">${esc((state.lots.find((l) => l.productId === r.productId) || { product: short(r.productId) }).product)}</td><td>${Number(r.filledUnits)} / ${Number(r.totalUnits)}</td>
+    <td>${Number(r.fills)} of ${r.fillHashes.length}</td><td><span class="pill ${RXSTATUS[Number(r.status)]}">${RXVERDICT[r.verdict]}</span></td>
+    <td class="muted">${r.designatedPharmacy === ethers.ZeroAddress ? "any pharmacy" : esc(orgOf(r.designatedPharmacy))}</td></tr>`).join("");
+  $("#rxPanel").innerHTML = `<h2>Prescriptions</h2>
+    <p class="muted">The ledger holds no patient name or ID. It holds one hash per allowed fill, and the patient holds the matching secret code.</p>
+    <div class="tablebox"><table><thead><tr><th>No.</th><th>Product</th><th>Units filled</th><th>Fills</th><th>Status</th><th>Reserved for</th></tr></thead><tbody>${rows || '<tr><td colspan="6" class="muted">None yet.</td></tr>'}</tbody></table></div>`;
+}
+
+function offerButtons(o) {
+  const me = roleAddr(state.role).toLowerCase();
+  const b = [];
+  if (OFFERSTATUS[Number(o.status)] !== "Open") return "";
+  if (o.to.toLowerCase() === me) b.push(`<button class="btn small" data-act="accept" data-id="${o.id}">Accept</button>`, `<button class="btn small ghost" data-act="reject" data-id="${o.id}">Reject</button>`);
+  if (o.from.toLowerCase() === me) b.push(`<button class="btn small ghost" data-act="cancel" data-id="${o.id}">Cancel</button>`);
+  if (Number(o.expiresAt) * 1000 < Date.now()) b.push(`<button class="btn small ghost" data-act="expire" data-id="${o.id}">Release expired</button>`);
+  return `<div class="actions">${b.join("")}</div>`;
+}
+function renderOffers() {
+  const rows = state.offers.slice().reverse().map((o) => {
+    const lot = state.lots.find((l) => l.id === o.lotId);
+    return `<tr><td>#${o.id}</td><td><div class="mono">${esc(lot ? lot.lotNo : short(o.lotId))}</div><div class="muted">${Number(o.qty)} units</div></td>
+      <td class="muted">${esc(orgOf(o.from))} to ${esc(orgOf(o.to))}<br>until ${fmtT(o.expiresAt)}</td>
+      <td><span class="pill ${OFFERSTATUS[Number(o.status)]}">${OFFERSTATUS[Number(o.status)]}</span>${offerButtons(o)}</td></tr>`;
+  }).join("");
+  $("#offersPanel").innerHTML = `<h2>Transfers</h2><p class="muted">Units are held in escrow while an offer is open. They move only when the receiver accepts.</p>
+    <div class="tablebox"><table><thead><tr><th>No.</th><th>Lot</th><th>Between</th><th>State</th></tr></thead><tbody>${rows || '<tr><td colspan="4" class="muted">No transfers yet.</td></tr>'}</tbody></table></div>`;
+}
+
+function renderAction() {
+  const r = state.role;
+  const defaultLot = state.lots.length ? state.lots[0].id : "";
+  let h = "";
+  if (r === "manufacturer") {
+    h = `<h2>Register a lot</h2>
+      <form id="createForm">
+        <div class="row2"><label for="cProd">Product code<input id="cProd" class="mono" value="${esc(D.product)}"></label><label for="cLot">Lot number<input id="cLot" class="mono" value="MOR-2026-${String(state.lots.length + 2).padStart(3, "0")}"></label></div>
+        <div class="row2"><label for="cQty">Units<input id="cQty" type="number" min="1" value="1000"></label><label for="cMonths">Shelf life (months)<input id="cMonths" type="number" min="1" value="18"></label></div>
+        <button class="btn" type="submit">Register lot</button>
+      </form>
+      <h3>Send stock to a wholesaler</h3>
+      <form id="offerForm">
+        <label for="oLot">Lot<select id="oLot">${lotOptions(defaultLot)}</select></label>
+        <div class="row2"><label for="oTo">To<select id="oTo">${recipientOptions(["wholesaler"])}</select></label><label for="oQty">Units<input id="oQty" type="number" min="1" value="500"></label></div>
+        <button class="btn" type="submit">Offer transfer</button>
+      </form>`;
+  } else if (r === "wholesaler") {
+    h = `<h2>Wholesaler desk</h2><p class="muted">Accept inbound offers in the Transfers panel, then pass stock on to a pharmacy.</p>
+      <form id="offerForm">
+        <label for="oLot">Lot<select id="oLot">${lotOptions(defaultLot)}</select></label>
+        <div class="row2"><label for="oTo">To<select id="oTo">${recipientOptions(["pharmacy"])}</select></label><label for="oQty">Units<input id="oQty" type="number" min="1" value="100"></label></div>
+        <button class="btn" type="submit">Offer transfer</button>
+      </form>${lossForm(defaultLot)}`;
+  } else if (r === "pharmacy") {
+    const demo = (D.demoPrescriptions || []).map((p) => p.secrets.map((s, i) => `<button type="button" data-fill='${JSON.stringify({ rx: p.rxId, secret: s })}'>Rx #${p.rxId}, fill ${i + 1}</button>`).join("")).join("");
+    h = `<h2>Pharmacy counter</h2><p class="muted">Accept inbound stock in the Transfers panel. To dispense, enter the prescription number and the code the patient presents.</p>
+      <div class="samples" style="margin-bottom:8px">${demo}</div>
+      <form id="dispForm">
+        <div class="row2"><label for="dRx">Prescription no.<input id="dRx" type="number" min="1" value="${(D.demoPrescriptions || [{ rxId: 1 }])[1]?.rxId || 1}"></label><label for="dUnits">Units<input id="dUnits" type="number" min="1" value="20"></label></div>
+        <label for="dLot">Lot<select id="dLot">${lotOptions(defaultLot)}</select></label>
+        <label for="dSecret">Patient's code<input id="dSecret" class="mono" placeholder="0x…" value="${esc(((D.demoPrescriptions || [])[1]?.secrets || [""])[0])}"></label>
+        <div class="actions"><button class="btn" type="submit">Dispense</button><button class="btn ghost" type="button" id="checkRx">Check prescription</button></div>
+        ${state.rxInfo ? `<div class="note">${state.rxInfo}</div>` : ""}
+      </form>${lossForm(defaultLot)}`;
+  } else if (r === "prescriber") {
+    h = `<h2>Issue a prescription</h2>
+      <form id="rxForm">
+        <label for="pProd">Product code<input id="pProd" class="mono" value="${esc(D.product)}"></label>
+        <div class="row2"><label for="pUnits">Total units<input id="pUnits" type="number" min="1" value="30"></label><label for="pFills">Number of fills (1 to 6)<input id="pFills" type="number" min="1" max="6" value="1"></label></div>
+        <div class="row2"><label for="pGap">Days between fills<input id="pGap" type="number" min="0" value="0"></label><label for="pPh">Reserved for<select id="pPh"><option value="${ethers.ZeroAddress}">Any licensed pharmacy</option>${recipientOptions(["pharmacy"])}</select></label></div>
+        <button class="btn" type="submit">Issue prescription</button>
+      </form>
+      ${state.newCodes ? `<div class="note ok" style="margin-top:10px">Prescription issued. Give these codes to the patient. They are not stored anywhere else, so save them now:<br>${state.newCodes.map((c, i) => `<br>Fill ${i + 1}: <span class="mono">${c}</span>`).join("")}</div>` : ""}
+      <h3>Cancel a prescription</h3>
+      <form id="cancelRxForm"><div class="row2"><label for="xRx">Prescription no.<input id="xRx" type="number" min="1" value="1"></label><button class="btn danger" type="submit" style="align-self:end">Cancel it</button></div></form>`;
+  } else {
+    h = `<h2>Regulator</h2>
+      <form id="quotaForm"><h3 style="margin-top:0">Pharmacy quota</h3>
+        <div class="row2"><label for="qPh">Pharmacy<select id="qPh">${recipientOptions(["pharmacy"])}</select></label><label for="qQty">Units per 30 days<input id="qQty" type="number" min="0" value="500"></label></div>
+        <label for="qProd">Product code<input id="qProd" class="mono" value="${esc(D.product)}"></label>
+        <button class="btn" type="submit">Set quota</button></form>
+      <h3>Recall a lot</h3>
+      <form id="recallForm"><label for="rLot">Lot<select id="rLot">${lotOptions(defaultLot)}</select></label><button class="btn danger" type="submit">Recall lot</button></form>
+      <h3>Suspend or reinstate the pharmacy</h3>
+      <div class="actions"><button class="btn danger" data-act="suspend" type="button">Suspend pharmacy</button><button class="btn ghost" data-act="reinstate" type="button">Reinstate</button></div>`;
+  }
+  $("#actionPanel").innerHTML = h;
+}
+function lossForm(defaultLot) {
+  return `<h3>Report a loss</h3><form id="lossForm"><div class="row2"><label for="lLot">Lot<select id="lLot">${lotOptions(defaultLot)}</select></label><label for="lQty">Units lost<input id="lQty" type="number" min="1" value="5"></label></div>
+    <button class="btn ghost" type="submit">Report loss</button></form>`;
+}
+
+function render() { renderRoles(); renderAction(); renderLots(); renderOffers(); renderRx(); }
+
+// ---- Events ------------------------------------------------------------------------
+document.addEventListener("click", async (ev) => {
+  const t = ev.target.closest("button");
+  if (!t) return;
+  if (t.dataset.view) { state.view = t.dataset.view; document.querySelectorAll("nav.views button").forEach((b) => b.setAttribute("aria-pressed", b === t)); $("#v-portal").hidden = state.view !== "portal"; $("#v-patient").hidden = state.view !== "patient"; return; }
+  if (t.dataset.role) { state.role = t.dataset.role; state.rxInfo = ""; state.newCodes = null; render(); return; }
+  if (t.id === "refresh") { await load(); render(); return; }
+  if (t.dataset.fill) { const f = JSON.parse(t.dataset.fill); $("#dRx").value = f.rx; $("#dSecret").value = f.secret; return; }
+  if (t.id === "checkRx") {
+    const v = await reader.verifyRx(Number($("#dRx").value));
+    state.rxInfo = `Prescription #${$("#dRx").value}: <b>${RXVERDICT[Number(v.verdict)]}</b>. ${Number(v.unitsLeft)} units and ${Number(v.fillsLeft)} fills left.` + (Number(v.nextFillAt) ? ` Next fill from ${fmtT(v.nextFillAt)}.` : "");
+    renderAction(); return;
+  }
+  const id = t.dataset.id && Number(t.dataset.id);
+  const act = t.dataset.act;
+  if (act === "accept") send("Accept transfer", (c) => c.acceptTransfer(id));
+  else if (act === "reject") send("Reject transfer", (c) => c.rejectTransfer(id, "rejected-via-demo"));
+  else if (act === "cancel") send("Cancel transfer", (c) => c.cancelTransfer(id));
+  else if (act === "expire") send("Release expired offer", (c) => c.expireOffer(id));
+  else if (act === "suspend") send("Suspend pharmacy", (c) => c.suspendMember(roleAddr("pharmacy"), "demo audit"));
+  else if (act === "reinstate") send("Reinstate pharmacy", (c) => c.reinstateMember(roleAddr("pharmacy")));
+});
+
+document.addEventListener("submit", (ev) => {
+  ev.preventDefault();
+  const id = ev.target.id, v = (s) => $(s).value;
+  const DAY = 86400;
+  if (id === "createForm") send("Register lot", async (c) => {
+    const docs = new TextEncoder().encode(JSON.stringify({ doc: "Certificate of Analysis", lot: v("#cLot") }));
+    const hash = ethers.sha256(docs);
+    return c.createLot({ product: v("#cProd"), lotNo: v("#cLot"), expiry: Math.floor(Date.now() / 1000) + Number(v("#cMonths")) * 30 * DAY, quantity: Number(v("#cQty")), docsCid: "sha256:" + hash.slice(2) });
+  });
+  else if (id === "offerForm") send("Offer transfer", (c) => c.offerTransfer(v("#oLot"), v("#oTo"), Number(v("#oQty")), ethers.id("delivery-note-" + Date.now()), 7 * DAY));
+  else if (id === "dispForm") send("Dispense", (c) => c.dispense(Number(v("#dRx")), v("#dLot"), Number(v("#dUnits")), v("#dSecret").trim()));
+  else if (id === "lossForm") send("Report loss", (c) => c.reportLoss(v("#lLot"), Number(v("#lQty")), "demo-loss-report"));
+  else if (id === "rxForm") {
+    const n = Number(v("#pFills"));
+    const secrets = Array.from({ length: n }, () => ethers.hexlify(ethers.randomBytes(32)));
+    send("Issue prescription", async (c) => { const tx = await c.issuePrescription(secrets.map((s) => ethers.keccak256(s)), v("#pProd"), Number(v("#pUnits")), 30 * DAY, Number(v("#pGap")) * DAY, v("#pPh")); state.newCodes = secrets; return tx; });
+  }
+  else if (id === "cancelRxForm") send("Cancel prescription", (c) => c.cancelPrescription(Number(v("#xRx"))));
+  else if (id === "quotaForm") send("Set quota", (c) => c.setQuota(v("#qPh"), v("#qProd"), Number(v("#qQty"))));
+  else if (id === "recallForm") send("Recall lot", (c) => c.recallLot(v("#rLot"), "Recalled from the demo page"));
+  else if (id === "verifyForm") checkLot();
+});
+
+// ---- Patient lot check -------------------------------------------------------------
+async function checkLot() {
+  const p = $("#vProd").value.trim(), l = $("#vLot").value.trim();
+  const box = $("#verdict");
+  box.innerHTML = `<div class="note"><span class="spinner"></span>Reading the blockchain…</div>`;
+  try {
+    const r = await reader.verifyLot(p, l);
+    const v = LOTVERDICT[Number(r.verdict)];
+    const MAP = {
+      Genuine: ["ok", "Genuine lot", `This lot is registered by ${esc(orgOf(r.manufacturer))} and expires ${fmtD(r.expiry)}.`],
+      Recalled: ["bad", "Do not use", "This lot has been recalled by the regulator or manufacturer. Return it to your pharmacy."],
+      Expired: ["warn", "Expired", `This lot expired on ${fmtD(r.expiry)}. Do not use it. Ask your pharmacist.`],
+      Unknown: ["bad", "Not recognised", "This lot is not in the register. It may be counterfeit. Do not use it, and tell your pharmacist."],
+    }[v];
+    box.innerHTML = `<div class="verdict ${MAP[0]}"><div class="big">${MAP[1]}</div><div class="detail">${MAP[2]}</div></div>`;
+  } catch (e) { box.innerHTML = `<div class="note err">${esc(friendly(e))}</div>`; }
+}
+function renderSamples() {
+  const s = [["Real lot", D.product, D.sampleLot], ["Made-up lot", D.product, "MOR-9999-999"]];
+  $("#samples").innerHTML = s.map((x) => `<button type="button" data-s='${JSON.stringify(x.slice(1))}'>${x[0]}</button>`).join("");
+  $("#samples").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; const [p, l] = JSON.parse(b.dataset.s); $("#vProd").value = p; $("#vLot").value = l; checkLot(); };
+  $("#vProd").value = D.product; $("#vLot").value = D.sampleLot;
+}
+
+// ---- Start ------------------------------------------------------------------------
+(async function start() {
+  try {
+    if (!D) throw new Error("web/deployment.js is missing. Run scripts/deploy-live.js first (see the deployment guide).");
+    await connect(); await load(); renderSamples(); render();
+  } catch (e) {
+    $("#setupError").hidden = false; $("#setupError").textContent = e.message;
+    $("#chainInfo").textContent = "Not connected";
+  }
+})();
+</script>
+</body>
+</html>
